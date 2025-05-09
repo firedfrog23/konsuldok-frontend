@@ -1,9 +1,7 @@
-// src/contexts/AuthContext.js
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import authService from '../services/auth.services';
-import { useNotification } from './NotificationContext';
-// Assume token utils exist if using localStorage
-// import { getToken, setToken, clearToken } from '../utils/localStorage';
+// src/contexts/AuthContext.jsx
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import authService from '../services/auth.services.js';
+import { useNotification } from './NotificationContext.jsx';
 
 const AuthContext = createContext(null);
 
@@ -13,134 +11,123 @@ const AuthContext = createContext(null);
  * @param {React.ReactNode} props.children - Child components.
  */
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null); // Stores user object { id, email, role, firstName, lastName, profile? }
-	const [isAuthenticated, setIsAuthenticated] = useState(false);
-	const [isLoading, setIsLoading] = useState(true); // Start loading initially to check for existing session
-	const { addNotification } = useNotification();
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { addNotification } = useNotification();
 
-	/**
-	 * Fetches the current user profile if authenticated.
-	 * Ideally called on initial load and after login/register.
-	 */
-	const loadUser = useCallback(async () => {
-		// Check if token exists (e.g., from localStorage or httpOnly cookie handled by server)
-		// const token = getToken();
-		// For simplicity, we assume backend handles cookie/session or interceptor adds token.
-		// If we have ways to check client-side, do it here. Let's assume check via /me endpoint.
-		try {
-		const currentUser = await authService.getMe();
-		if (currentUser) {
-			setUser(currentUser);
-			setIsAuthenticated(true);
-			console.log("User loaded:", currentUser.email);
-		} else {
-			throw new Error("No user data returned");
-		}
-		} catch (error) {
-		console.error("Failed to load user:", error.message);
-		setUser(null);
-		setIsAuthenticated(false);
-		// clearToken(); // Clear invalid token if stored client-side
-		} finally {
-		setIsLoading(false);
-		}
-	}, []);
+  const loadUser = useCallback(async () => {
+    // console.log("AuthContext: Attempting to load user...");
+    try {
+      const currentUser = await authService.getMe();
+      if (currentUser) {
+        setUser(currentUser);
+        setIsAuthenticated(true);
+        // console.log("AuthContext: User loaded:", currentUser.email);
+      } else {
+        // This case means getMe returned null (e.g. 401 or no data)
+        // console.log("AuthContext: No user data returned from getMe, setting unauthenticated.");
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error("AuthContext: Failed to load user:", error.message);
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+      // console.log("AuthContext: loadUser finished, isLoading:", false, "isAuthenticated:", isAuthenticated);
+    }
+  }, [/* Removed isAuthenticated from dependencies to avoid loop on initial set */]);
 
-	// Initial load check
-	useEffect(() => {
-		loadUser();
-	}, [loadUser]);
 
-	/**
-	 * Logs in the user.
-	 * @param {string} email - User's email.
-	 * @param {string} password - User's password.
-	 * @returns {Promise<boolean>} True on success, false on failure.
-	 */
-	const login = useCallback(async (email, password) => {
-		setIsLoading(true);
-		try {
-		const { user: loggedInUser /*, accessToken */ } = await authService.login(email, password);
-		// if (accessToken) setToken(accessToken); // Store token if needed client-side
-		setUser(loggedInUser);
-		setIsAuthenticated(true);
-		addNotification('Login successful!', 'success');
-		setIsLoading(false);
-		return true;
-		} catch (error) {
-		console.error("Login failed:", error);
-		setUser(null);
-		setIsAuthenticated(false);
-		addNotification(`Login failed: ${error.message}`, 'error');
-		setIsLoading(false);
-		return false;
-		}
-	}, [addNotification]);
+  useEffect(() => {
+    loadUser();
+  }, [loadUser]);
 
-	/**
-	 * Registers a new user.
-	 * @param {object} userData - User registration data.
-	 * @returns {Promise<boolean>} True on success, false on failure.
-	 */
-	const register = useCallback(async (userData) => {
-		setIsLoading(true);
-		try {
-		const { user: registeredUser /*, accessToken */ } = await authService.register(userData);
-		// if (accessToken) setToken(accessToken); // Store token if needed client-side
-		setUser(registeredUser);
-		setIsAuthenticated(true);
-		addNotification('Registration successful!', 'success');
-		setIsLoading(false);
-		return true;
-		} catch (error) {
-		console.error("Registration failed:", error);
-		addNotification(`Registration failed: ${error.message}`, 'error');
-		setIsLoading(false);
-		return false;
-		}
-	}, [addNotification]);
+  const login = useCallback(async (email, password) => { /* ... (keep existing login logic) ... */
+    setIsLoading(true);
+    try {
+      const { user: loggedInUser } = await authService.login(email, password);
+      setUser(loggedInUser);
+      setIsAuthenticated(true);
+      addNotification('Login successful!', 'success'); // Success is Blue
+      setIsLoading(false);
+      return true;
+    } catch (error) {
+      console.error("Login failed:", error);
+      setUser(null);
+      setIsAuthenticated(false);
+      addNotification(`Login failed: ${error.message || 'Invalid credentials'}`, 'error'); // Error is Orange
+      setIsLoading(false);
+      return false;
+    }
+  }, [addNotification]);
 
-	/**
-	 * Logs out the user.
-	 */
-	const logout = useCallback(async () => {
-		setIsLoading(true);
-		try {
-		await authService.logout(); // Call backend logout if necessary (e.g., invalidate refresh token)
-		} catch(error) {
-		console.error("Backend logout failed:", error);
-		// Proceed with client-side logout anyway
-		} finally {
-		// clearToken(); // Clear client-side token
-		setUser(null);
-		setIsAuthenticated(false);
-		addNotification('Logout successful.', 'info');
-		setIsLoading(false);
-		// Redirect handled by component or ProtectedRoute
-		}
-	}, [addNotification]);
+  const register = useCallback(async (userData) => { /* ... (keep existing register logic) ... */
+    setIsLoading(true);
+    try {
+      const { user: registeredUser } = await authService.register(userData);
+      setUser(registeredUser);
+      setIsAuthenticated(true);
+      addNotification('Registration successful! Welcome.', 'success'); // Success is Blue
+      setIsLoading(false);
+      return true;
+    } catch (error) {
+      console.error("Registration failed:", error);
+      addNotification(`Registration failed: ${error.message || 'Could not create account.'}`, 'error'); // Error is Orange
+      setIsLoading(false);
+      return false;
+    }
+  }, [addNotification]);
 
-	const value = {
-		user,
-		isAuthenticated,
-		isLoading,
-		login,
-		register,
-		logout,
-		loadUser // Expose loadUser if needed for manual refresh
-	};
+  const logout = useCallback(async () => { /* ... (keep existing logout logic) ... */
+    setIsLoading(true);
+    try {
+      await authService.logout();
+    } catch(error) {
+       console.error("Backend logout failed:", error);
+    } finally {
+       setUser(null);
+       setIsAuthenticated(false);
+       addNotification('Logout successful.', 'info'); // Info is Blue
+       setIsLoading(false);
+    }
+  }, [addNotification]);
 
-	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  /**
+   * Updates the user object in the context.
+   * Useful after profile updates.
+   * @param {object} updatedUserData - The new user data.
+   */
+  const updateUserInContext = useCallback((updatedUserData) => {
+    setUser(prevUser => ({ ...prevUser, ...updatedUserData }));
+    // If critical auth-related fields change (like role), you might need to re-verify or re-issue token,
+    // but for typical profile updates (name, phone), just updating the local user object is often sufficient.
+  }, []);
+
+
+  const value = {
+    user,
+    isAuthenticated,
+    isLoading,
+    login,
+    register,
+    logout,
+    loadUser,
+    updateUserInContext // --- ADDED ---
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 /**
  * Hook to consume the AuthContext.
- * @returns {{ user: object|null, isAuthenticated: boolean, isLoading: boolean, login: Function, register: Function, logout: Function, loadUser: Function }} Auth context value.
  */
-export const useAuth = () => {
-	const context = useContext(AuthContext);
-	if (!context) {
-		throw new Error('useAuth must be used within an AuthProvider');
-	}
-	return context;
+export const useAuth = () => { /* ... (keep existing useAuth logic) ... */
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
