@@ -1,0 +1,99 @@
+/* src/index.css */
+
+/* 1. Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* 2. Import Tailwind CSS core */
+@import "tailwindcss";
+
+/* 3. Configure and load DaisyUI Plugin */
+@plugin "daisyui" {
+  themes: konsuldok-theme --default;
+}
+
+/* 4. Define the custom DaisyUI theme: 'konsuldok-theme' */
+@plugin "daisyui/theme" {
+  name: "konsuldok-theme";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+
+  /* --- NEW 4-Color Palette STRICT --- */
+  /* Base Colors */
+  --color-base-100: oklch(98.7% 0.003 280); /* Chill White (#F9FAFB) */
+  /* Use subtle blue/orange tints for 200/300 to avoid gray */
+  --color-base-200: oklch(97.5% 0.008 260); /* Off-white with slight blue tint */
+  --color-base-300: oklch(97.5% 0.008 50);  /* Off-white with slight orange tint */
+  --color-base-content: oklch(10.5% 0.006 260); /* Black (#101314) */
+
+  /* Primary Color (Blue) */
+  --color-primary: oklch(62.7% 0.18 259.8);  /* Blue */
+  --color-primary-focus: oklch(58% 0.2 260);   /* Slightly Darker Blue */
+  --color-primary-content: oklch(98.7% 0.003 280); /* Chill White */
+
+  /* Secondary Color (Orange) */
+  --color-secondary: oklch(70.6% 0.19 50.4); /* Orange */
+   --color-secondary-focus: oklch(66% 0.21 50); /* Slightly Darker Orange */
+  --color-secondary-content: oklch(98.7% 0.003 280); /* Chill White */
+
+  /* Accent Color (Mapped to Secondary Orange) */
+  --color-accent: oklch(70.6% 0.19 50.4); /* Orange */
+  --color-accent-focus: oklch(66% 0.21 50); /* Slightly Darker Orange */
+  --color-accent-content: oklch(98.7% 0.003 280); /* Chill White */
+
+  /* Neutral Color (Mapped to Black BG / White Text) */
+  --color-neutral: oklch(10.5% 0.006 260); /* Black (#101314) */
+  --color-neutral-focus: oklch(15% 0.006 260); /* Slightly Lighter Black */
+  --color-neutral-content: oklch(98.7% 0.003 280); /* Chill White */
+
+  /* Functional Colors (Mapped to Blue/Orange) */
+  --color-info: oklch(62.7% 0.18 259.8);        /* Blue */
+  --color-info-content: oklch(98.7% 0.003 280); /* Chill White */
+  --color-success: oklch(62.7% 0.18 259.8);      /* Blue */
+  --color-success-content: oklch(98.7% 0.003 280);/* Chill White */
+  --color-warning: oklch(70.6% 0.19 50.4);       /* Orange */
+  --color-warning-content: oklch(98.7% 0.003 280);/* Chill White */
+  --color-error: oklch(70.6% 0.19 50.4);         /* Orange */
+  --color-error-content: oklch(98.7% 0.003 280);  /* Chill White */
+  /* --- END NEW PALETTE --- */
+
+  /* Font Family */
+  --font-family-sans: "Poppins", "Inter", system-ui, sans-serif;
+
+  /* Radii and Other variables */
+  --radius-box: 0.75rem;  /* Slightly smaller radius */
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1.9rem;
+  --border: 1px; /* Keep border width */
+  /* Remove others if not needed */
+}
+
+/* 5. REMOVED Separate @theme block */
+
+/* 6. Custom Component Styles Specific to the Theme */
+[data-theme="konsuldok-theme"] {
+  /* Custom Badge Styles - Use theme functional colors */
+  .badge-submitted { background-color: var(--color-success); color: var(--color-success-content); border-color: transparent; }
+  .badge-in-review { background-color: var(--color-warning); color: var(--color-warning-content); border-color: transparent; }
+  .badge-marked { background-color: var(--color-secondary); color: var(--color-secondary-content); border-color: transparent; }
+}
+
+/* 7. Custom Utility Classes & Overrides */
+/* REMOVED .btn-primary-light and .custom-scrollbar */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Animations (Keep as is) */
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } } /* Subtle float */
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
+.auth-square { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; animation-delay: 0.5s; }
+
+/* Apply base font and ensure body takes full height */
+html, body {
+  height: 100%;
+}
+body {
+  @apply font-sans bg-base-100 text-base-content; /* Base is Off-White, Text is Black */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
