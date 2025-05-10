@@ -4,7 +4,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useNotification } from '../../contexts/NotificationContext.jsx'; // Use .jsx
-import authService from '../../services/auth.services.js'; // Corrected import
+import authService from '../../services/auth.service.js'; // Corrected import
 
 /**
  * Forgot password form - Card removed, icon added.

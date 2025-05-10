@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useNotification } from '../../contexts/NotificationContext.jsx';
 import { UserIcon, PhoneIcon } from '@heroicons/react/24/outline';
-import userService from '../../services/user.services.js';
+import userService from '../../services/user.service.js';
 
 /**
  * Form for updating user's own profile (first name, last name, phone number).

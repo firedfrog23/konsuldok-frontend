@@ -4,7 +4,7 @@ import React, { useState } from 'react'; // Import useState for password toggle
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useNotification } from '../../contexts/NotificationContext.jsx';
-import authService from '../../services/auth.services.js';
+import authService from '../../services/auth.service.js';
 
 /**
  * Reset password form using token from URL - Card removed.

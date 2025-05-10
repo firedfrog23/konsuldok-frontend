@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import ProfileUpdateForm from '../components/user/ProfileUpdateForm.jsx';
-import userService from '../services/user.services.js'; // Import user service
+import userService from '../services/user.service.js'; // Import user service
 import { useNotification } from '../contexts/NotificationContext.jsx'; // For notifications
 import {
     UserCircleIcon, EnvelopeIcon, PhoneIcon, ShieldCheckIcon,
