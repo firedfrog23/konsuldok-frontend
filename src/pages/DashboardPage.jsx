@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import appointmentService from '../services/appointment.service.js';
-import patientDataService from '../services/patientData.service.js'; // Using this for patient-specific mock data
+import patientDataService from '../services/patientData.service.js'; // Using this for patient-specific mock data too
 import { UserRoles } from '../utils/constants.js';
 import {
     CalendarDaysIcon,
@@ -21,16 +21,16 @@ import {
     LinkIcon,
     PhoneIcon, // For Patient Quick Links
     HeartIcon,
-    ClipboardDocumentListIcon, // For Medications
+    ClipboardDocumentListIcon, // For Medications & Doctor Tips
     UserGroupIcon,
     InformationCircleIcon,
-    BriefcaseIcon, // For Doctor's Schedule
-    VideoCameraIcon,
     ExclamationTriangleIcon,
-    AdjustmentsHorizontalIcon // For Doctor Quick Links
+    BriefcaseIcon, // For Doctor's Schedule & Quick Links
+    VideoCameraIcon, // For Doctor's Appointments
+    AdjustmentsHorizontalIcon // For Doctor Quick Links (Placeholder, maybe not used)
 } from '@heroicons/react/24/outline';
 import { useNotification } from '../contexts/NotificationContext.jsx';
-import { format, isToday, parseISO, startOfWeek, endOfWeek, isFuture } from 'date-fns';
+import { format, isToday, parseISO, startOfWeek, endOfWeek, isFuture } from 'date-fns'; // Combined date-fns imports
 
 /**
  * Patient-specific dashboard content.
@@ -65,7 +65,7 @@ const PatientDashboardView = () => {
     const healthTips = [
         { id: 1, tip: "Stay hydrated! Aim for 8-10 glasses of water a day for optimal organ function and energy.", icon: SparklesIcon },
         { id: 2, tip: "Incorporate at least 30 minutes of moderate exercise, like brisk walking or cycling, into your daily routine.", icon: HeartIcon },
-        { id: 3, tip: "Prioritize 7-9 hours of quality sleep each night. Consistent sleep patterns aid physical and mental restoration.", icon: SparklesIcon },
+        { id: 3, tip: "Prioritize 7-9 hours of quality sleep each night. Consistent sleep patterns aid physical and mental restoration.", icon: SparklesIcon }, // Added from second version
     ];
     const healthNews = [
         { id: 1, title: "New Study Highlights Benefits of Mediterranean Diet for Heart Health", source: "Global Health Journal", date: "May 8, 2025", excerpt: "A recent extensive study underscores the significant cardiovascular benefits...", link: "#" },
@@ -78,6 +78,7 @@ const PatientDashboardView = () => {
         { id: 'ql4', name: 'Support & FAQ', href: '/support', icon: ChatBubbleLeftEllipsisIcon },
     ];
 
+    // Renamed to be specific to this view
     const fetchPatientDashboardData = useCallback(async () => {
         if (!user || user.role !== UserRoles.PATIENT) return;
 
@@ -90,9 +91,9 @@ const PatientDashboardView = () => {
             const apptFilters = { status: ['Confirmed', 'Requested'], sortBy: 'appointmentTime', order: 'asc', limit: 3 };
             const [apptData, labData, medData, goalsData] = await Promise.all([
                 appointmentService.getMyAppointments(apptFilters),
-                patientDataService.getMyRecentLabResults({ limit: 3 }),
-                patientDataService.getMyMedicationReminders({ limit: 3 }),
-                patientDataService.getMyHealthGoals({ limit: 3 })
+                patientDataService.getMyRecentLabResults({ limit: 3 }), // Using patientDataService
+                patientDataService.getMyMedicationReminders({ limit: 3 }), // Using patientDataService
+                patientDataService.getMyHealthGoals({ limit: 3 }) // Using patientDataService
             ]);
 
             setUpcomingAppointments(apptData.appointments || []);
@@ -101,9 +102,10 @@ const PatientDashboardView = () => {
             setHealthGoals(goalsData || []);
 
         } catch (err) {
-            console.error("Failed to fetch patient dashboard data:", err);
+            console.error("Failed to fetch patient dashboard data:", err); // Added console log
             const errorMsg = err.message || 'Could not load some dashboard data.';
-            setAppointmentsError(errorMsg); // Set a general error or specific ones
+            // Set specific errors (more granular than first version)
+            setAppointmentsError(errorMsg);
             setLabsError(errorMsg);
             setMedsError(errorMsg);
             setGoalsError(errorMsg);
@@ -124,7 +126,7 @@ const PatientDashboardView = () => {
         if (healthTips.length === 0) return;
         const tipInterval = setInterval(() => {
             setCurrentTipIndex(prevIndex => (prevIndex + 1) % healthTips.length);
-        }, 10000);
+        }, 10000); // 10 seconds interval
         return () => clearInterval(tipInterval);
     }, [healthTips.length]);
 
@@ -138,22 +140,26 @@ const PatientDashboardView = () => {
                 <p className="mt-2 text-lg text-base-content/80"> Here's your personalized health dashboard. </p>
             </header>
 
-            {/* Quick Stats / Summary Cards */}
+            {/* Quick Stats / Summary Cards - Kept the same structure */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                  <div className="card bg-base-200 shadow-md border-l-4 border-primary hover:shadow-lg transition-shadow"> <div className="card-body"> <div className="flex items-center space-x-3 mb-3"> <CalendarDaysIcon className="w-7 h-7 text-primary" /> <h2 className="card-title text-lg text-primary">Upcoming Appointments</h2> </div> {isLoadingAppointments ? <span className="loading loading-dots loading-sm text-primary"></span> : appointmentError ? <p className="text-error text-xs">Error loading</p> : upcomingAppointments.length > 0 ? ( <p className="text-3xl font-bold text-base-content">{upcomingAppointments.length}</p> ) : ( <p className="text-base-content/70">No upcoming.</p> )} <div className="card-actions justify-end mt-2"> <Link to="/appointments" className="btn btn-xs btn-outline btn-primary">View All</Link> </div> </div> </div>
                  <div className="card bg-base-200 shadow-md border-l-4 border-secondary hover:shadow-lg transition-shadow"> <div className="card-body"> <div className="flex items-center space-x-3 mb-3"> <ChatBubbleLeftEllipsisIcon className="w-7 h-7 text-secondary" /> <h2 className="card-title text-lg text-secondary">Recent Messages</h2> </div> {recentMessages.filter(m => m.unread).length > 0 ? ( <p className="text-3xl font-bold text-base-content"> {recentMessages.filter(m => m.unread).length} <span className="text-sm font-normal">New</span> </p> ) : ( <p className="text-base-content/70">No new messages.</p> )} <div className="card-actions justify-end mt-2"> <Link to="/messages" className="btn btn-xs btn-outline btn-secondary">View Messages</Link> </div> </div> </div>
                  <div className="card bg-neutral text-neutral-content shadow-md border-l-4 border-neutral-focus hover:shadow-lg transition-shadow"> <div className="card-body"> <div className="flex items-center space-x-3 mb-3"> <DocumentTextIcon className="w-7 h-7 text-neutral-content" /> <h2 className="card-title text-lg text-neutral-content">Medical Records</h2> </div> <p className="text-sm text-neutral-content/80">Access your lab results, notes, and documents.</p> <div className="card-actions justify-end mt-4"> <Link to="/medical-records" className="btn btn-xs btn-outline border-neutral-content text-neutral-content hover:bg-neutral-content hover:text-neutral">View Records</Link> </div> </div> </div>
             </section>
 
+            {/* Action Buttons */}
             <section className="py-6">
                  <div className="flex flex-col sm:flex-row sm:justify-center gap-4"> <Link to="/book-appointment" className="btn btn-primary btn-wide shadow hover:shadow-md"> <PlusCircleIcon className="w-5 h-5 mr-2" /> Book New Appointment </Link> <Link to="/profile" className="btn btn-secondary btn-outline btn-wide shadow hover:shadow-md"> <UserCircleIcon className="w-5 h-5 mr-2" /> View/Edit Profile </Link> </div>
             </section>
 
+            {/* Appointments & Health Tip Section */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 <div className="lg:col-span-2">
                     <h2 className="text-2xl font-semibold text-primary mb-4">Your Next Appointments</h2>
-                    {isLoadingAppointments ? ( <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <span className="loading loading-dots loading-lg text-primary"></span> <p className="mt-2 text-base-content/70">Loading appointments...</p> </div>
-                    ) : appointmentError ? ( <div role="alert" className="alert alert-warning shadow-md bg-secondary/10 border-secondary/30"> <ExclamationTriangleIcon className="stroke-current shrink-0 h-6 w-6 text-secondary"/> <div> <h3 className="font-bold text-secondary">Could not load appointments</h3> <div className="text-xs text-base-content/80">{appointmentError}</div> </div> </div>
+                    {isLoadingAppointments ? (
+                        <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <span className="loading loading-dots loading-lg text-primary"></span> <p className="mt-2 text-base-content/70">Loading appointments...</p> </div>
+                    ) : appointmentError ? (
+                        <div role="alert" className="alert alert-warning shadow-md bg-secondary/10 border-secondary/30"> <ExclamationTriangleIcon className="stroke-current shrink-0 h-6 w-6 text-secondary"/> <div> <h3 className="font-bold text-secondary">Could not load appointments</h3> <div className="text-xs text-base-content/80">{appointmentError}</div> </div> </div>
                     ) : upcomingAppointments.length > 0 ? (
                         <div className="space-y-4">
                             {upcomingAppointments.map(appt => (
@@ -171,26 +177,47 @@ const PatientDashboardView = () => {
                                     </div>
                                 </div>
                             ))}
-                            {upcomingAppointments.length > 3 && ( <div className="text-right mt-4"> <Link to="/appointments" className="link link-primary text-sm font-medium">View all appointments &rarr;</Link> </div> )}
+                            {/* Conditional "View All" link based on count */}
+                            {upcomingAppointments.length >= 3 && (
+                                <div className="text-right mt-4"> <Link to="/appointments" className="link link-primary text-sm font-medium">View all appointments &rarr;</Link> </div>
+                            )}
                         </div>
-                    ) : ( <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <CalendarDaysIcon className="w-16 h-16 mx-auto text-base-content/30 mb-3" /> <p className="text-base-content/70 mb-4">You have no upcoming appointments scheduled.</p> <Link to="/book-appointment" className="btn btn-sm btn-secondary">Book Now</Link> </div> )}
+                    ) : (
+                        <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <CalendarDaysIcon className="w-16 h-16 mx-auto text-base-content/30 mb-3" /> <p className="text-base-content/70 mb-4">You have no upcoming appointments scheduled.</p> <Link to="/book-appointment" className="btn btn-sm btn-secondary">Book Now</Link> </div>
+                    )}
                 </div>
                 <div className="lg:col-span-1">
                     <h2 className="text-2xl font-semibold text-secondary mb-4">Health Tip</h2>
                     <div className="card bg-secondary/10 text-base-content shadow border border-secondary/20 h-full flex flex-col">
                         <div className="card-body flex-grow flex flex-col items-center text-center justify-center">
                             <CurrentTipIcon className="w-10 h-10 text-secondary mb-3" />
-                            {healthTips.length > 0 && ( <AnimatePresence mode="wait"> <motion.p key={currentTipIndex} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.5 }} className="text-sm sm:text-base leading-relaxed" > {currentHealthTip.tip} </motion.p> </AnimatePresence> )}
+                            {healthTips.length > 0 && (
+                                <AnimatePresence mode="wait">
+                                    <motion.p
+                                        key={currentTipIndex}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="text-sm sm:text-base leading-relaxed"
+                                    >
+                                        {currentHealthTip.tip}
+                                    </motion.p>
+                                </AnimatePresence>
+                            )}
                         </div>
                     </div>
                 </div>
             </section>
 
+             {/* Recent Lab Results Section */}
             <section>
                 <h2 className="text-2xl font-semibold text-primary mb-4 flex items-center"> <BeakerIcon className="w-6 h-6 mr-2 text-primary opacity-80"/> Recent Lab Results</h2>
                 <div className="bg-base-200 shadow-md rounded-lg p-6 border border-black/10">
-                    {isLoadingLabs ? ( <div className="text-center py-6"><span className="loading loading-dots loading-md text-primary"></span></div>
-                    ) : labsError ? ( <p className="text-center py-6 text-error text-sm">{labsError}</p>
+                    {isLoadingLabs ? (
+                        <div className="text-center py-6"><span className="loading loading-dots loading-md text-primary"></span></div>
+                    ) : labsError ? (
+                        <p className="text-center py-6 text-error text-sm">{labsError}</p>
                     ) : recentLabResults.length > 0 ? (
                         <ul className="divide-y divide-base-300">
                             {recentLabResults.map(result => (
@@ -200,23 +227,29 @@ const PatientDashboardView = () => {
                                         <p className="text-xs text-base-content/70">Date: {format(new Date(result.date), 'PPP')} - <span className={result.status === 'Action Required' ? 'text-secondary font-semibold' : 'text-base-content/80'}>{result.status}</span></p>
                                         <p className="text-xs text-base-content/70 italic mt-0.5">{result.summary}</p>
                                     </div>
+                                    {/* Link logic remains the same */}
                                     <Link to={result.link || '#'} className={`btn btn-xs ${result.status === 'Results Available' || result.status === 'Action Required' ? 'btn-outline btn-primary' : 'btn-ghost text-base-content/60 cursor-not-allowed'}`}>
                                         {result.status === 'Pending' ? 'Pending' : 'View Results'}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
-                    ) : ( <div className="text-center py-6"> <BeakerIcon className="w-12 h-12 mx-auto text-base-content/30 mb-2" /> <p className="text-base-content/70">No recent lab results found.</p> </div> )}
+                    ) : (
+                        <div className="text-center py-6"> <BeakerIcon className="w-12 h-12 mx-auto text-base-content/30 mb-2" /> <p className="text-base-content/70">No recent lab results found.</p> </div>
+                    )}
                      <div className="text-right mt-4"> <Link to="/lab-results" className="link link-primary text-sm font-medium">View all lab results &rarr;</Link> </div>
                 </div>
             </section>
 
+            {/* Medications & Health Goals Section */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                 <div>
                     <h2 className="text-2xl font-semibold text-secondary mb-4 flex items-center"><ClipboardDocumentListIcon className="w-6 h-6 mr-2 text-secondary opacity-80"/>Medication Reminders</h2>
                     <div className="bg-base-200 shadow-md rounded-lg p-6 border border-black/10 space-y-3">
-                        {isLoadingMeds ? ( <div className="text-center py-6"><span className="loading loading-dots loading-md text-secondary"></span></div>
-                        ) : medsError ? ( <p className="text-center py-6 text-error text-sm">{medsError}</p>
+                        {isLoadingMeds ? (
+                            <div className="text-center py-6"><span className="loading loading-dots loading-md text-secondary"></span></div>
+                        ) : medsError ? (
+                            <p className="text-center py-6 text-error text-sm">{medsError}</p>
                         ) : medicationReminders.length > 0 ? (
                             medicationReminders.map(med => (
                                 <div key={med._id} className="p-3 rounded-md bg-base-100 border border-secondary/20">
@@ -228,33 +261,102 @@ const PatientDashboardView = () => {
                                     <p className="text-xs text-base-content/60 italic mt-0.5">{med.instructions}</p>
                                 </div>
                             ))
-                        ) : ( <div className="text-center py-6"> <ClipboardDocumentListIcon className="w-12 h-12 mx-auto text-base-content/30 mb-2" /> <p className="text-base-content/70">No active medication reminders.</p> </div> )}
+                        ) : (
+                            <div className="text-center py-6"> <ClipboardDocumentListIcon className="w-12 h-12 mx-auto text-base-content/30 mb-2" /> <p className="text-base-content/70">No active medication reminders.</p> </div>
+                        )}
                         <div className="card-actions justify-end mt-4"> <Link to="/medications" className="btn btn-xs btn-outline btn-secondary">Manage Medications</Link> </div>
                     </div>
                 </div>
                 <div>
                      <h2 className="text-2xl font-semibold text-primary mb-4 flex items-center"><FlagIcon className="w-6 h-6 mr-2 text-primary opacity-80"/>Your Health Goals</h2>
                      <div className="bg-base-200 shadow-md rounded-lg p-6 border border-black/10 space-y-3">
-                        {isLoadingGoals ? ( <div className="text-center py-6"><span className="loading loading-dots loading-md text-primary"></span></div>
-                        ) : goalsError ? ( <p className="text-center py-6 text-error text-sm">{goalsError}</p>
-                        ) : healthGoals.length > 0 ? (
-                            healthGoals.map(goal => ( <div key={goal._id} className="p-3 rounded-md bg-base-100 border border-primary/20"> <div className="flex justify-between items-center mb-1"> <div><p className="text-sm font-medium text-base-content">{goal.name}</p><p className="text-xs text-base-content/70">{goal.description}</p></div> <span className={`badge badge-sm ${ goal.status === 'Achieved Today' ? 'badge-success' : goal.status === 'In Progress' ? 'badge-info' : 'badge-warning' }`}>{goal.status}</span> </div> <progress className={`progress ${ goal.status === 'Achieved Today' ? 'progress-success' : goal.status === 'In Progress' ? 'progress-info' : 'progress-warning' } w-full`} value={goal.progress} max="100"></progress> <p className="text-xs text-right text-base-content/60 mt-0.5">{goal.progress}% - Target: {goal.target}</p></div> ))
-                        ) : ( <div className="text-center py-6"> <FlagIcon className="w-12 h-12 mx-auto text-base-content/30 mb-2" /> <p className="text-base-content/70">No health goals set yet.</p> </div> )}
-                        <div className="card-actions justify-end mt-4"> <Link to="/health-goals" className="btn btn-xs btn-outline btn-primary">Set/View Goals</Link> </div>
+                         {isLoadingGoals ? (
+                             <div className="text-center py-6"><span className="loading loading-dots loading-md text-primary"></span></div>
+                         ) : goalsError ? (
+                             <p className="text-center py-6 text-error text-sm">{goalsError}</p>
+                         ) : healthGoals.length > 0 ? (
+                             healthGoals.map(goal => (
+                                 <div key={goal._id} className="p-3 rounded-md bg-base-100 border border-primary/20">
+                                     <div className="flex justify-between items-center mb-1">
+                                         <div><p className="text-sm font-medium text-base-content">{goal.name}</p><p className="text-xs text-base-content/70">{goal.description}</p></div>
+                                         <span className={`badge badge-sm ${ goal.status === 'Achieved Today' ? 'badge-success' : goal.status === 'In Progress' ? 'badge-info' : 'badge-warning' }`}>{goal.status}</span>
+                                     </div>
+                                     <progress className={`progress ${ goal.status === 'Achieved Today' ? 'progress-success' : goal.status === 'In Progress' ? 'progress-info' : 'progress-warning' } w-full`} value={goal.progress} max="100"></progress>
+                                     <p className="text-xs text-right text-base-content/60 mt-0.5">{goal.progress}% - Target: {goal.target}</p>
+                                </div>
+                             ))
+                         ) : (
+                             <div className="text-center py-6"> <FlagIcon className="w-12 h-12 mx-auto text-base-content/30 mb-2" /> <p className="text-base-content/70">No health goals set yet.</p> </div>
+                         )}
+                         <div className="card-actions justify-end mt-4"> <Link to="/health-goals" className="btn btn-xs btn-outline btn-primary">Set/View Goals</Link> </div>
                      </div>
                 </div>
             </section>
 
+             {/* Health News Section */}
             <section className="mt-8 md:mt-12">
-                 <h2 className="text-2xl font-semibold text-primary mb-4 flex items-center"><NewspaperIcon className="w-6 h-6 mr-2 text-primary opacity-80"/>Health News & Updates</h2> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {healthNews.slice(0,3).map(newsItem => ( <div key={newsItem.id} className="card bg-base-200 shadow border border-black/10 hover:shadow-lg transition-shadow h-full flex flex-col"> <div className="card-body flex flex-col justify-between"> <div> <h3 className="card-title text-md font-semibold text-base-content leading-tight hover:text-primary transition-colors"><a href={newsItem.link} target="_blank" rel="noopener noreferrer">{newsItem.title}</a></h3> <p className="text-xs text-base-content/60 mt-1">{newsItem.source} - {newsItem.date}</p> <p className="text-sm text-base-content/80 mt-2 leading-relaxed line-clamp-3">{newsItem.excerpt}</p> </div> <div className="card-actions justify-end mt-4"> <a href={newsItem.link} target="_blank" rel="noopener noreferrer" className="btn btn-xs btn-outline btn-secondary"> Read More <ArrowRightIcon className="w-3 h-3 ml-1"/> </a> </div> </div> </div> ))} </div> {healthNews.length > 3 && ( <div className="text-center mt-6"> <Link to="/health-news" className="btn btn-primary btn-outline">View All News</Link> </div> )}
+                 <h2 className="text-2xl font-semibold text-primary mb-4 flex items-center"><NewspaperIcon className="w-6 h-6 mr-2 text-primary opacity-80"/>Health News & Updates</h2>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     {healthNews.slice(0,3).map(newsItem => (
+                         <div key={newsItem.id} className="card bg-base-200 shadow border border-black/10 hover:shadow-lg transition-shadow h-full flex flex-col">
+                             <div className="card-body flex flex-col justify-between">
+                                 <div>
+                                     <h3 className="card-title text-md font-semibold text-base-content leading-tight hover:text-primary transition-colors"><a href={newsItem.link} target="_blank" rel="noopener noreferrer">{newsItem.title}</a></h3>
+                                     <p className="text-xs text-base-content/60 mt-1">{newsItem.source} - {newsItem.date}</p>
+                                     <p className="text-sm text-base-content/80 mt-2 leading-relaxed line-clamp-3">{newsItem.excerpt}</p>
+                                 </div>
+                                 <div className="card-actions justify-end mt-4">
+                                     <a href={newsItem.link} target="_blank" rel="noopener noreferrer" className="btn btn-xs btn-outline btn-secondary"> Read More <ArrowRightIcon className="w-3 h-3 ml-1"/> </a>
+                                 </div>
+                             </div>
+                         </div>
+                     ))}
+                 </div>
+                 {/* Show "View All" only if there are more news items than displayed */}
+                 {healthNews.length > 3 && (
+                     <div className="text-center mt-6"> <Link to="/health-news" className="btn btn-primary btn-outline">View All News</Link> </div>
+                 )}
             </section>
 
+             {/* Quick Resources Section */}
             <section className="mt-8 md:mt-12">
-                 <h2 className="text-2xl font-semibold text-secondary mb-4 flex items-center"><LinkIcon className="w-6 h-6 mr-2 text-secondary opacity-80"/>Quick Resources</h2> <div className="grid grid-cols-2 sm:grid-cols-4 gap-4"> {quickLinks.map(link => { const LinkIconComponent = link.icon; return ( <Link key={link.id} to={link.href} className="card bg-base-200 shadow hover:shadow-md border border-black/10 p-4 flex flex-col items-center text-center transition-all hover:border-secondary/50 hover:bg-base-300"> <LinkIconComponent className="w-7 h-7 text-secondary mb-2" /> <p className="text-sm font-medium text-base-content hover:text-secondary transition-colors">{link.name}</p> </Link> ); })} </div>
+                 <h2 className="text-2xl font-semibold text-secondary mb-4 flex items-center"><LinkIcon className="w-6 h-6 mr-2 text-secondary opacity-80"/>Quick Resources</h2>
+                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                     {quickLinks.map(link => {
+                         const LinkIconComponent = link.icon;
+                         return (
+                             <Link key={link.id} to={link.href} className="card bg-base-200 shadow hover:shadow-md border border-black/10 p-4 flex flex-col items-center text-center transition-all hover:border-secondary/50 hover:bg-base-300">
+                                 <LinkIconComponent className="w-7 h-7 text-secondary mb-2" />
+                                 <p className="text-sm font-medium text-base-content hover:text-secondary transition-colors">{link.name}</p>
+                             </Link>
+                         );
+                     })}
+                 </div>
             </section>
 
+             {/* Health Trends Placeholder Section */}
             <section className="mt-8 md:mt-12">
-                 <h2 className="text-2xl font-semibold text-primary mb-4">Your Health Trends (Placeholder)</h2> <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> <div className="card bg-base-200 shadow border border-black/10"> <div className="card-body"> <h3 className="card-title text-sm text-primary">Blood Pressure Trend</h3> <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2"> <ChartBarIcon className="w-16 h-16 text-primary/30" /> <p className="text-base-content/50 ml-2">Chart Data Unavailable</p> </div> </div> </div> <div className="card bg-base-200 shadow border border-black/10"> <div className="card-body"> <h3 className="card-title text-sm text-secondary">Activity Levels</h3> <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2"> <ChartBarIcon className="w-16 h-16 text-secondary/30" /> <p className="text-base-content/50 ml-2">Chart Data Unavailable</p> </div> </div> </div> </div>
+                 <h2 className="text-2xl font-semibold text-primary mb-4">Your Health Trends (Placeholder)</h2>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="card bg-base-200 shadow border border-black/10">
+                         <div className="card-body">
+                             <h3 className="card-title text-sm text-primary">Blood Pressure Trend</h3>
+                             <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2">
+                                 <ChartBarIcon className="w-16 h-16 text-primary/30" />
+                                 <p className="text-base-content/50 ml-2">Chart Data Unavailable</p>
+                             </div>
+                         </div>
+                     </div>
+                     <div className="card bg-base-200 shadow border border-black/10">
+                         <div className="card-body">
+                             <h3 className="card-title text-sm text-secondary">Activity Levels</h3>
+                             <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2">
+                                 <ChartBarIcon className="w-16 h-16 text-secondary/30" />
+                                 <p className="text-base-content/50 ml-2">Chart Data Unavailable</p>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
             </section>
         </>
     );
@@ -262,6 +364,7 @@ const PatientDashboardView = () => {
 
 /**
  * Doctor-specific dashboard content.
+ * (Derived from the second snippet, as the first was a placeholder)
  */
 const DoctorDashboardView = () => {
     const { user } = useAuth();
@@ -272,8 +375,9 @@ const DoctorDashboardView = () => {
     const [appointmentError, setAppointmentsError] = useState(null);
     const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
-    const unreadMessagesCount = 3; // Placeholder
-    const pendingLabReviewsCount = 5; // Placeholder
+    // Placeholder data - should ideally come from backend/context
+    const unreadMessagesCount = 3;
+    const pendingLabReviewsCount = 5;
 
     const doctorTips = [
         { id: 1, tip: "Clearly explain treatment options to empower patient decision-making.", icon: SparklesIcon },
@@ -293,9 +397,10 @@ const DoctorDashboardView = () => {
         { id: 'ql4', name: 'Clinical Guidelines', href: '/resources/guidelines', icon: DocumentTextIcon },
     ];
 
+    // Renamed to be specific to this view
     const fetchDoctorDashboardData = useCallback(async () => {
         if (!user || user.role !== UserRoles.DOCTOR) {
-            setIsLoadingAppointments(false);
+            setIsLoadingAppointments(false); // Prevent loading state if wrong user
             return;
         }
         setIsLoadingAppointments(true);
@@ -303,27 +408,30 @@ const DoctorDashboardView = () => {
         try {
             const today = new Date();
             const filters = {
-                status: ['Confirmed', 'Requested'],
-                startDate: format(today, 'yyyy-MM-dd'),
+                status: ['Confirmed', 'Requested'], // Assuming doctors see both
+                startDate: format(today, 'yyyy-MM-dd'), // Fetch from today onwards
                 sortBy: 'appointmentTime',
                 order: 'asc',
-                limit: 20,
+                limit: 20, // Fetch more to calculate counts accurately
             };
-            const data = await appointmentService.getMyAppointments(filters);
+            const data = await appointmentService.getMyAppointments(filters); // Assuming this fetches doctor's appointments
             const allFetchedAppointments = data.appointments || [];
 
+            // Filter for display: today's appointments (limit 3 for the list)
             const todayFiltered = allFetchedAppointments.filter(appt =>
-                isToday(parseISO(appt.appointmentTime))
+                appt.appointmentTime && isToday(parseISO(appt.appointmentTime))
             ).slice(0, 3);
 
+            // Count all future/today appointments
             const upcomingCount = allFetchedAppointments.filter(appt =>
-                isFuture(parseISO(appt.appointmentTime)) || isToday(parseISO(appt.appointmentTime))
+                appt.appointmentTime && (isFuture(parseISO(appt.appointmentTime)) || isToday(parseISO(appt.appointmentTime)))
             ).length;
 
             setTodaysAppointments(todayFiltered);
             setUpcomingAppointmentsCount(upcomingCount);
 
         } catch (err) {
+            console.error("Failed to fetch doctor dashboard data:", err);
             const errorMsg = err.message || 'Could not load your appointments.';
             setAppointmentsError(errorMsg);
             addNotification(errorMsg, 'error');
@@ -340,7 +448,7 @@ const DoctorDashboardView = () => {
         if (doctorTips.length === 0) return;
         const tipInterval = setInterval(() => {
             setCurrentTipIndex(prevIndex => (prevIndex + 1) % doctorTips.length);
-        }, 12000);
+        }, 12000); // 12 seconds interval for doctor tips
         return () => clearInterval(tipInterval);
     }, [doctorTips.length]);
 
@@ -354,6 +462,7 @@ const DoctorDashboardView = () => {
                 <p className="mt-2 text-lg text-base-content/80"> Here’s an overview of your day and patient activities. </p>
             </header>
 
+            {/* Quick Stats */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="card bg-base-200 shadow-md border-l-4 border-primary hover:shadow-lg transition-shadow">
                     <div className="card-body"> <div className="flex items-center space-x-3 mb-3"> <CalendarDaysIcon className="w-7 h-7 text-primary" /> <h2 className="card-title text-lg text-primary">Upcoming Appointments</h2> </div> {isLoadingAppointments ? <span className="loading loading-dots loading-sm text-primary"></span> : appointmentError ? <p className="text-error text-xs">Error loading</p> : <p className="text-3xl font-bold text-base-content">{upcomingAppointmentsCount}</p>} <div className="card-actions justify-end mt-2"> <Link to="/doctor/appointments" className="btn btn-xs btn-outline btn-primary">View Schedule</Link> </div> </div>
@@ -366,26 +475,31 @@ const DoctorDashboardView = () => {
                 </div>
             </section>
 
+            {/* Action Buttons */}
             <section className="py-6">
                  <div className="flex flex-col sm:flex-row sm:justify-center gap-4"> <Link to="/doctor/appointments" className="btn btn-primary btn-wide shadow hover:shadow-md"> <BriefcaseIcon className="w-5 h-5 mr-2" /> My Full Schedule </Link> <Link to="/patients/search" className="btn btn-secondary btn-outline btn-wide shadow hover:shadow-md"> <UserGroupIcon className="w-5 h-5 mr-2" /> Find Patient Record </Link> </div>
             </section>
 
+            {/* Today's Appointments & Pro Tip */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 <div className="lg:col-span-2">
                     <h2 className="text-2xl font-semibold text-primary mb-4">Today's Focus</h2>
-                    {isLoadingAppointments ? ( <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <span className="loading loading-dots loading-lg text-primary"></span> <p className="mt-2 text-base-content/70">Loading today's schedule...</p> </div>
-                    ) : appointmentError ? ( <div role="alert" className="alert alert-warning shadow-md bg-secondary/10 border-secondary/30"> <ExclamationTriangleIcon className="stroke-current shrink-0 h-6 w-6 text-secondary"/> <div> <h3 className="font-bold text-secondary">Could not load schedule</h3> <div className="text-xs text-base-content/80">{appointmentError}</div> </div> </div>
+                    {isLoadingAppointments ? (
+                        <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <span className="loading loading-dots loading-lg text-primary"></span> <p className="mt-2 text-base-content/70">Loading today's schedule...</p> </div>
+                    ) : appointmentError ? (
+                        <div role="alert" className="alert alert-warning shadow-md bg-secondary/10 border-secondary/30"> <ExclamationTriangleIcon className="stroke-current shrink-0 h-6 w-6 text-secondary"/> <div> <h3 className="font-bold text-secondary">Could not load schedule</h3> <div className="text-xs text-base-content/80">{appointmentError}</div> </div> </div>
                     ) : todaysAppointments.length > 0 ? (
                         <div className="space-y-4">
                             {todaysAppointments.map(appt => (
                                 <div key={appt._id} className="card card-compact bg-base-200 shadow border border-black/10 hover:border-primary/30 transition-all">
                                     <div className="card-body flex-col sm:flex-row justify-between items-start sm:items-center">
                                         <div className="flex items-center space-x-3">
+                                            {/* Icon based on appointment type */}
                                             {appt.type === 'Virtual Consultation' ? <VideoCameraIcon className="w-6 h-6 text-primary opacity-70 flex-shrink-0"/> : <CalendarDaysIcon className="w-6 h-6 text-primary opacity-70 flex-shrink-0" />}
                                             <div>
                                                 <h3 className="font-semibold text-base-content"> {appt.patient?.userAccount?.fullName || 'Patient Name'} </h3>
                                                 <p className="text-sm text-secondary">{appt.reasonForVisit || appt.type || 'Consultation'}</p>
-                                                <p className="text-xs text-base-content/70 mt-1"> {appt.appointmentTime ? format(parseISO(appt.appointmentTime), 'p') : 'N/A'} {appt.durationMinutes && ` (${appt.durationMinutes} min)`} </p>
+                                                <p className="text-xs text-base-content/70 mt-1"> {appt.appointmentTime ? format(parseISO(appt.appointmentTime), 'p', { timeZone: 'Asia/Jakarta' }) : 'N/A'} {appt.durationMinutes && ` (${appt.durationMinutes} min)`} </p>
                                             </div>
                                         </div>
                                         <div className="flex gap-2 mt-2 sm:mt-0 self-end sm:self-center">
@@ -395,61 +509,111 @@ const DoctorDashboardView = () => {
                                     </div>
                                 </div>
                             ))}
+                            {/* Optional: Link to full day view if more than 3 */}
+                            {/* {upcomingAppointmentsCount > 3 && todaysAppointments.length >=3 && (...) } */}
                         </div>
-                    ) : ( <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <CalendarDaysIcon className="w-16 h-16 mx-auto text-base-content/30 mb-3" /> <p className="text-base-content/70 mb-4">No appointments scheduled for today.</p> <Link to="/doctor/appointments" className="btn btn-sm btn-primary btn-outline">View Full Schedule</Link> </div> )}
+                    ) : (
+                        <div className="text-center py-10 bg-base-200 rounded-lg shadow"> <CalendarDaysIcon className="w-16 h-16 mx-auto text-base-content/30 mb-3" /> <p className="text-base-content/70 mb-4">No appointments scheduled for today.</p> <Link to="/doctor/appointments" className="btn btn-sm btn-primary btn-outline">View Full Schedule</Link> </div>
+                    )}
                 </div>
                 <div className="lg:col-span-1">
                     <h2 className="text-2xl font-semibold text-secondary mb-4">Pro Tip</h2>
                     <div className="card bg-secondary/10 text-base-content shadow border border-secondary/20 h-full flex flex-col">
                         <div className="card-body flex-grow flex flex-col items-center text-center justify-center">
                             <CurrentDoctorTipIcon className="w-10 h-10 text-secondary mb-3" />
-                            {doctorTips.length > 0 && ( <AnimatePresence mode="wait"> <motion.p key={currentTipIndex} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.5 }} className="text-sm sm:text-base leading-relaxed" > {currentDoctorTip.tip} </motion.p> </AnimatePresence> )}
+                            {doctorTips.length > 0 && (
+                                <AnimatePresence mode="wait">
+                                    <motion.p
+                                        key={currentTipIndex}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="text-sm sm:text-base leading-relaxed"
+                                    >
+                                        {currentDoctorTip.tip}
+                                    </motion.p>
+                                </AnimatePresence>
+                            )}
                         </div>
                     </div>
                 </div>
             </section>
 
+            {/* Clinic Announcements */}
             <section className="mt-8 md:mt-12">
-                 <h2 className="text-2xl font-semibold text-primary mb-4 flex items-center"><NewspaperIcon className="w-6 h-6 mr-2 text-primary opacity-80"/>Clinic Announcements</h2>
-                 <div className="space-y-4">
+                <h2 className="text-2xl font-semibold text-primary mb-4 flex items-center"><NewspaperIcon className="w-6 h-6 mr-2 text-primary opacity-80"/>Clinic Announcements</h2>
+                <div className="space-y-4">
                     {clinicAnnouncements.slice(0,2).map(newsItem => (
                         <div key={newsItem.id} className="card card-compact bg-base-200 shadow border border-black/10 hover:shadow-md transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title text-md font-semibold text-base-content hover:text-primary transition-colors"><a href={newsItem.link} target="_blank" rel="noopener noreferrer">{newsItem.title}</a></h3>
-                                <p className="text-xs text-base-content/60 mt-1">{newsItem.date}</p>
+                                <p className="text-xs text-base-content/60 mt-1">{newsItem.date}</p> {/* Add date if available */}
                                 <p className="text-sm text-base-content/80 mt-1 leading-relaxed line-clamp-2">{newsItem.excerpt}</p>
                             </div>
                         </div>
                     ))}
-                 </div>
-                 {clinicAnnouncements.length > 2 && ( <div className="text-center mt-6"> <Link to="/clinic/announcements" className="btn btn-primary btn-outline btn-sm">View All Announcements</Link> </div> )}
+                </div>
+                {/* Show "View All" only if there are more announcements */}
+                {clinicAnnouncements.length > 2 && (
+                    <div className="text-center mt-6"> <Link to="/clinic/announcements" className="btn btn-primary btn-outline btn-sm">View All Announcements</Link> </div>
+                )}
             </section>
 
+            {/* Quick Links */}
             <section className="mt-8 md:mt-12">
-                 <h2 className="text-2xl font-semibold text-secondary mb-4 flex items-center"><LinkIcon className="w-6 h-6 mr-2 text-secondary opacity-80"/>Quick Links</h2>
-                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {quickLinksDoctor.map(link => { const LinkIconComponent = link.icon; return ( <Link key={link.id} to={link.href} className="card bg-base-200 shadow hover:shadow-md border border-black/10 p-4 flex flex-col items-center text-center transition-all hover:border-secondary/50 hover:bg-base-300"> <LinkIconComponent className="w-7 h-7 text-secondary mb-2" /> <p className="text-sm font-medium text-base-content hover:text-secondary transition-colors">{link.name}</p> </Link> ); })}
-                 </div>
+                <h2 className="text-2xl font-semibold text-secondary mb-4 flex items-center"><LinkIcon className="w-6 h-6 mr-2 text-secondary opacity-80"/>Quick Links</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {quickLinksDoctor.map(link => {
+                        const LinkIconComponent = link.icon;
+                        return (
+                            <Link key={link.id} to={link.href} className="card bg-base-200 shadow hover:shadow-md border border-black/10 p-4 flex flex-col items-center text-center transition-all hover:border-secondary/50 hover:bg-base-300">
+                                <LinkIconComponent className="w-7 h-7 text-secondary mb-2" />
+                                <p className="text-sm font-medium text-base-content hover:text-secondary transition-colors">{link.name}</p>
+                            </Link>
+                        );
+                    })}
+                </div>
             </section>
 
+            {/* Performance Placeholder */}
             <section className="mt-8 md:mt-12">
-                 <h2 className="text-2xl font-semibold text-primary mb-4">My Performance (Placeholder)</h2>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="card bg-base-200 shadow border border-black/10"> <div className="card-body"> <h3 className="card-title text-sm text-primary">Consultations this Week</h3> <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2"> <ChartBarIcon className="w-16 h-16 text-primary/30" /> <p className="text-base-content/50 ml-2">Data Unavailable</p> </div> </div> </div>
-                    <div className="card bg-base-200 shadow border border-black/10"> <div className="card-body"> <h3 className="card-title text-sm text-secondary">Patient Satisfaction (Avg)</h3> <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2"> <SparklesIcon className="w-16 h-16 text-secondary/30" /> <p className="text-base-content/50 ml-2">Data Unavailable</p> </div> </div> </div>
+                <h2 className="text-2xl font-semibold text-primary mb-4">My Performance (Placeholder)</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="card bg-base-200 shadow border border-black/10">
+                        <div className="card-body">
+                            <h3 className="card-title text-sm text-primary">Consultations this Week</h3>
+                            <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2">
+                                <ChartBarIcon className="w-16 h-16 text-primary/30" />
+                                <p className="text-base-content/50 ml-2">Data Unavailable</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="card bg-base-200 shadow border border-black/10">
+                        <div className="card-body">
+                            <h3 className="card-title text-sm text-secondary">Patient Satisfaction (Avg)</h3>
+                            <div className="flex justify-center items-center h-40 bg-base-100 rounded-md mt-2">
+                                <SparklesIcon className="w-16 h-16 text-secondary/30" />
+                                <p className="text-base-content/50 ml-2">Data Unavailable</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </>
     );
 };
 
+
 /**
  * Main DashboardPage component.
  * Conditionally renders Patient or Doctor view based on user role.
+ * Handles loading and authentication states.
  */
 function DashboardPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
 
+    // Display loading spinner while authentication status is being determined
     if (isAuthLoading) {
         return (
             <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -458,6 +622,7 @@ function DashboardPage() {
         );
     }
 
+    // Display access denied message and login link if user is not authenticated
     if (!user) {
         return (
             <div className="text-center p-10">
@@ -468,19 +633,20 @@ function DashboardPage() {
         );
     }
 
-    // Conditional rendering based on role
+    // Render the appropriate dashboard view based on the user's role
     return (
-        <div className="max-w-7xl mx-auto space-y-8 md:space-y-12 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-12 pb-12"> {/* Added padding */}
             {user.role === UserRoles.PATIENT && <PatientDashboardView />}
             {user.role === UserRoles.DOCTOR && <DoctorDashboardView />}
+
             {/* Add other roles like Admin or Staff here if needed */}
             {/* {user.role === UserRoles.ADMIN && <AdminDashboardView />} */}
             {/* {user.role === UserRoles.STAFF && <StaffDashboardView />} */}
 
-            {/* Fallback if role is not matched by specific views */}
+            {/* Fallback message if the user role doesn't match Patient or Doctor */}
             {![UserRoles.PATIENT, UserRoles.DOCTOR].includes(user.role) && (
-                 <div className="text-center p-10">
-                    <InformationCircleIcon className="w-12 h-12 mx-auto text-info mb-4" /> {/* Info is Blue */}
+                <div className="text-center p-10">
+                    <InformationCircleIcon className="w-12 h-12 mx-auto text-info mb-4" /> {/* Info color for neutral feedback */}
                     <p className="text-xl font-semibold">Dashboard Unavailable</p>
                     <p className="text-base-content/80 mt-2">
                         A dashboard view for your role ({user.role}) is not yet available.

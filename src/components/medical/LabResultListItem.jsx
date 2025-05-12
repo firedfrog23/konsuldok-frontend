@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { BeakerIcon, DocumentArrowDownIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { BeakerIcon, DocumentArrowDownIcon, ExclamationTriangleIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 /**
  * Displays a single lab result item in a list.
@@ -14,11 +14,11 @@ function LabResultListItem({ result }) {
     const getStatusInfo = (status) => {
         switch (status?.toLowerCase()) {
             case 'results available':
-                return { textClass: 'text-success', badgeClass: 'badge-success', icon: <InformationCircleIcon className="w-4 h-4 mr-1 text-success" /> }; // Success is Blue
+                return { textClass: 'text-success', badgeClass: 'badge-success', icon: <BeakerIcon className="w-4 h-4 mr-1 text-success" /> }; // Success is Blue
             case 'action required':
                 return { textClass: 'text-error font-semibold', badgeClass: 'badge-error', icon: <ExclamationTriangleIcon className="w-4 h-4 mr-1 text-error" /> }; // Error is Orange
             case 'pending':
-                return { textClass: 'text-base-content/70 italic', badgeClass: 'badge-ghost', icon: <ClockIcon className="w-4 h-4 mr-1 text-base-content/70" /> }; // ClockIcon needs import
+                return { textClass: 'text-base-content/70 italic', badgeClass: 'badge-ghost', icon: <ClockIcon className="w-4 h-4 mr-1 text-base-content/70" /> };
             default:
                 return { textClass: 'text-base-content/70', badgeClass: 'badge-ghost', icon: null };
         }
@@ -26,18 +26,18 @@ function LabResultListItem({ result }) {
     const statusInfo = getStatusInfo(result.status);
 
     return (
-        <li className="py-4 px-2 first:pt-2 last:pb-2">
+        <li className="py-4 px-2 first:pt-2 last:pb-2 transition-colors hover:bg-base-200/50 rounded-md">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
-                <div className="flex items-start space-x-3 flex-grow min-w-0"> {/* Added min-w-0 for truncation */}
-                    <BeakerIcon className={`w-7 h-7 mt-1 flex-shrink-0 ${statusInfo.textClass === 'text-error' ? 'text-secondary' : 'text-primary'}`} />
-                    <div className="flex-grow min-w-0"> {/* Added min-w-0 for truncation */}
+                <div className="flex items-start space-x-3 flex-grow min-w-0">
+                    <BeakerIcon className={`w-7 h-7 mt-1 flex-shrink-0 ${statusInfo.badgeClass === 'badge-error' ? 'text-secondary' : 'text-primary'}`} />
+                    <div className="flex-grow min-w-0">
                         <p className="font-semibold text-base-content truncate" title={result.name}>{result.name}</p>
                         <p className="text-xs text-base-content/70">
                             Date: {result.date ? format(new Date(result.date), 'PPP') : 'N/A'}
                         </p>
-                        <div className="flex items-center text-xs mt-0.5">
+                        <div className={`flex items-center text-xs mt-0.5 font-medium ${statusInfo.textClass}`}>
                             {statusInfo.icon}
-                            <span className={`${statusInfo.textClass}`}>{result.status}</span>
+                            <span>{result.status}</span>
                         </div>
                         {result.summary && <p className="text-xs text-base-content/80 mt-1 italic line-clamp-2" title={result.summary}>{result.summary}</p>}
                     </div>
@@ -45,7 +45,7 @@ function LabResultListItem({ result }) {
                 <div className="mt-2 sm:mt-0 self-end sm:self-center flex-shrink-0">
                     {result.reportUrl && result.reportUrl !== '#' && result.status !== 'Pending' ? (
                         <a
-                            href={result.reportUrl} // Assuming this is a direct link or a route to view
+                            href={result.reportUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn btn-xs btn-outline btn-primary"
@@ -56,14 +56,12 @@ function LabResultListItem({ result }) {
                     ) : result.status === 'Pending' ? (
                         <span className="text-xs text-base-content/60 italic">Awaiting results</span>
                     ) : (
-                        <span className="text-xs text-base-content/60 italic">No report</span>
+                        <span className="text-xs text-base-content/60 italic">No report attached</span>
                     )}
                 </div>
             </div>
         </li>
     );
 }
-// Import ClockIcon if used in getStatusInfo
-import { ClockIcon } from '@heroicons/react/24/outline'; // Add this if needed
 
 export default LabResultListItem;

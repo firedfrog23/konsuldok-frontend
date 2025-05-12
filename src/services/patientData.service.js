@@ -1,14 +1,14 @@
 // src/services/patientData.service.js
 // import apiClient from './apiClient'; // Uncomment when integrating with a real backend
 
-// --- Mock Data Store ---
+// --- Mock Data Store (ensure these are let if modified by CRUD) ---
 let mockLabResults = [
-    { _id: 'labRes1_patientA', name: 'Complete Blood Count (CBC)', date: '2025-05-01T10:00:00Z', status: 'Results Available', summary: 'All values within normal reference ranges. No abnormalities detected.', reportUrl: '/view/lab/cbc_05012025.pdf', details: 'Hemoglobin: 14.5 g/dL, WBC: 7.5 x10^3/uL, Platelets: 250 x10^3/uL. Ordered by Dr. A. Putri.' },
-    { _id: 'labRes2_patientA', name: 'Lipid Panel', date: '2025-05-01T10:15:00Z', status: 'Action Required', summary: 'LDL Cholesterol slightly elevated (135 mg/dL). HDL and Triglycerides normal. Recommend dietary review and follow-up.', reportUrl: '/view/lab/lipid_05012025.pdf', details: 'Total Cholesterol: 210 mg/dL, LDL: 135 mg/dL, HDL: 60 mg/dL, Triglycerides: 75 mg/dL. Ordered by Dr. A. Putri.' },
+    { _id: 'labRes1_patientA', name: 'Complete Blood Count (CBC)', date: '2025-05-01T10:00:00Z', status: 'Results Available', summary: 'All values within normal reference ranges. No abnormalities detected.', reportUrl: '#view-report-cbc', details: 'Hemoglobin: 14.5 g/dL, WBC: 7.5 x10^3/uL, Platelets: 250 x10^3/uL. Ordered by Dr. A. Putri.' },
+    { _id: 'labRes2_patientA', name: 'Lipid Panel', date: '2025-05-01T10:15:00Z', status: 'Action Required', summary: 'LDL Cholesterol slightly elevated (135 mg/dL). HDL and Triglycerides normal. Recommend dietary review and follow-up.', reportUrl: '#view-report-lipid', details: 'Total Cholesterol: 210 mg/dL, LDL: 135 mg/dL, HDL: 60 mg/dL, Triglycerides: 75 mg/dL. Ordered by Dr. A. Putri.' },
     { _id: 'labRes3_patientA', name: 'Thyroid Function Panel (TSH, T3, T4)', date: '2025-04-15T09:30:00Z', status: 'Pending', summary: 'Results are being processed by the lab. Expected by EOD.', reportUrl: null, details: 'Sample collected on April 15th. Ordered by Dr. B. Santoso.' },
-    { _id: 'labRes4_patientA', name: 'Urinalysis', date: '2025-03-20T11:00:00Z', status: 'Results Available', summary: 'No significant findings. Trace protein noted, monitor if symptoms persist.', reportUrl: '/view/lab/urinalysis_03202025.pdf', details: 'Color: Yellow, Clarity: Clear, pH: 6.0, Protein: Trace. Ordered by Dr. B. Santoso.' },
-    { _id: 'labRes5_patientA', name: 'Glucose, Fasting', date: '2025-02-10T08:00:00Z', status: 'Results Available', summary: 'Fasting glucose within normal limits.', reportUrl: '/view/lab/glucose_02102025.pdf', details: 'Glucose: 90 mg/dL. Ordered by Dr. A. Putri.' },
-    { _id: 'labRes6_patientA', name: 'Vitamin D Level', date: '2025-01-05T09:00:00Z', status: 'Results Available', summary: 'Slightly below optimal range. Supplementation discussed.', reportUrl: '/view/lab/vitamind_01052025.pdf', details: '25-Hydroxyvitamin D: 25 ng/mL. Ordered by Dr. C. Lestari.' },
+    { _id: 'labRes4_patientA', name: 'Urinalysis', date: '2025-03-20T11:00:00Z', status: 'Results Available', summary: 'No significant findings. Trace protein noted, monitor if symptoms persist.', reportUrl: '#view-report-urinalysis', details: 'Color: Yellow, Clarity: Clear, pH: 6.0, Protein: Trace. Ordered by Dr. B. Santoso.' },
+    { _id: 'labRes5_patientA', name: 'Glucose, Fasting', date: '2025-02-10T08:00:00Z', status: 'Results Available', summary: 'Fasting glucose within normal limits.', reportUrl: '#view-report-glucose', details: 'Glucose: 90 mg/dL. Ordered by Dr. A. Putri.' },
+    { _id: 'labRes6_patientA', name: 'Vitamin D Level', date: '2025-01-05T09:00:00Z', status: 'Results Available', summary: 'Slightly below optimal range. Supplementation discussed.', reportUrl: '#view-report-vitamind', details: '25-Hydroxyvitamin D: 25 ng/mL. Ordered by Dr. C. Lestari.' },
 ];
 
 let mockMedications = [
@@ -27,65 +27,28 @@ let mockHealthGoals = [
 ];
 // --- End Mock Data ---
 
-
-/**
- * Simulates an API call delay.
- * @param {number} ms - Milliseconds to delay.
- * @returns {Promise<void>}
- */
 const simulateDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-/**
- * Fetches recent lab results for the authenticated patient.
- * @param {object} [filters={ limit: 3 }] - Optional filters.
- * @returns {Promise<Array<object>>} List of recent lab results.
- */
 const getMyRecentLabResults = async (filters = { limit: 3 }) => {
-    console.log("Simulating API: Fetching recent lab results with filters:", filters);
     await simulateDelay(500 + Math.random() * 300);
-    // In a real app: const response = await apiClient.get('/patient/lab-results/recent', { params: filters });
-    // return response.data.data || [];
     return mockLabResults.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, filters.limit);
 };
 
-/**
- * Fetches all lab results for the authenticated patient with pagination.
- * @param {object} [filters={ page: 1, limit: 10 }] - Optional filters.
- * @returns {Promise<object>} Paginated list of lab results.
- */
 const getAllMyLabResults = async (filters = { page: 1, limit: 10 }) => {
-    console.log("Simulating API: Fetching all lab results with filters:", filters);
     await simulateDelay(700 + Math.random() * 300);
     const page = filters.page || 1;
     const limit = filters.limit || 10;
     const sortedResults = mockLabResults.sort((a, b) => new Date(b.date) - new Date(a.date));
     const paginatedResults = sortedResults.slice((page - 1) * limit, page * limit);
-    return {
-        results: paginatedResults,
-        currentPage: page,
-        totalPages: Math.ceil(sortedResults.length / limit),
-        totalCount: sortedResults.length,
-    };
+    return { results: paginatedResults, currentPage: page, totalPages: Math.ceil(sortedResults.length / limit), totalCount: sortedResults.length };
 };
 
-/**
- * Fetches current medication reminders for the authenticated patient.
- * @param {object} [filters={ limit: 3 }] - Optional filters.
- * @returns {Promise<Array<object>>} List of medication reminders.
- */
 const getMyMedicationReminders = async (filters = { limit: 3 }) => {
-    console.log("Simulating API: Fetching medication reminders with filters:", filters);
     await simulateDelay(600 + Math.random() * 300);
     return mockMedications.filter(m => m.isActive).sort((a,b) => a.name.localeCompare(b.name)).slice(0, filters.limit);
 };
 
-/**
- * Fetches all medications for the authenticated patient with pagination.
- * @param {object} [filters={ page: 1, limit: 10, status: 'active' }] - Optional filters.
- * @returns {Promise<object>} Paginated list of medications.
- */
 const getAllMyMedications = async (filters = { page: 1, limit: 10, status: 'active' }) => {
-    console.log("Simulating API: Fetching all medications with filters:", filters);
     await simulateDelay(700 + Math.random() * 300);
     const page = filters.page || 1;
     const limit = filters.limit || 10;
@@ -95,75 +58,39 @@ const getAllMyMedications = async (filters = { page: 1, limit: 10, status: 'acti
     } else if (filters.status === 'inactive') {
         filteredMeds = mockMedications.filter(m => !m.isActive);
     }
-    // Add sorting if needed, e.g., by name
     const sortedMeds = filteredMeds.sort((a,b) => a.name.localeCompare(b.name));
     const paginatedMeds = sortedMeds.slice((page - 1) * limit, page * limit);
-    return {
-        medications: paginatedMeds,
-        currentPage: page,
-        totalPages: Math.ceil(sortedMeds.length / limit),
-        totalCount: sortedMeds.length,
-    };
+    return { medications: paginatedMeds, currentPage: page, totalPages: Math.ceil(sortedMeds.length / limit), totalCount: sortedMeds.length };
 };
 
-/**
- * Fetches current health goals for the authenticated patient.
- * @param {object} [filters={ limit: 3 }] - Optional filters.
- * @returns {Promise<Array<object>>} List of health goals.
- */
 const getMyHealthGoals = async (filters = { limit: 3 }) => {
-    console.log("Simulating API: Fetching health goals with filters:", filters);
     await simulateDelay(800 + Math.random() * 300);
     return mockHealthGoals.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated)).slice(0, filters.limit);
 };
 
-/**
- * Fetches all health goals for the authenticated patient with pagination.
- * @param {object} [filters={ page: 1, limit: 10 }] - Optional filters.
- * @returns {Promise<object>} Paginated list of health goals.
- */
 const getAllMyHealthGoals = async (filters = { page: 1, limit: 10 }) => {
-    console.log("Simulating API: Fetching all health goals with filters:", filters);
     await simulateDelay(900 + Math.random() * 300);
     const page = filters.page || 1;
     const limit = filters.limit || 10;
     const sortedGoals = mockHealthGoals.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
     const paginatedGoals = sortedGoals.slice((page - 1) * limit, page * limit);
-    return {
-        goals: paginatedGoals,
-        currentPage: page,
-        totalPages: Math.ceil(sortedGoals.length / limit),
-        totalCount: sortedGoals.length,
-    };
+    return { goals: paginatedGoals, currentPage: page, totalPages: Math.ceil(sortedGoals.length / limit), totalCount: sortedGoals.length };
 };
 
-/**
- * Adds a new health goal for the patient.
- * @param {object} goalData - The data for the new goal.
- * @returns {Promise<object>} The newly created health goal.
- */
 const addHealthGoal = async (goalData) => {
-    console.log("Simulating API: Adding health goal", goalData);
     await simulateDelay(500);
     const newGoal = {
-        _id: `goal${Date.now()}_patientA_${Math.random().toString(36).substring(2, 7)}`, // More unique ID
+        _id: `goal${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         ...goalData,
-        progress: parseInt(goalData.progress, 10) || 0, // Ensure progress is a number
+        progress: parseInt(goalData.progress, 10) || 0,
         status: goalData.status || 'In Progress',
         lastUpdated: new Date().toISOString(),
     };
-    mockHealthGoals.unshift(newGoal); // Add to the beginning of the mock array
+    mockHealthGoals.unshift(newGoal);
     return newGoal;
 };
 
-/**
- * Updates an existing health goal.
- * @param {string} goalId - The ID of the goal to update.
- * @param {object} goalData - The data to update.
- * @returns {Promise<object>} The updated health goal.
- */
 const updateHealthGoal = async (goalId, goalData) => {
-    console.log("Simulating API: Updating health goal", goalId, goalData);
     await simulateDelay(500);
     const goalIndex = mockHealthGoals.findIndex(g => g._id === goalId);
     if (goalIndex > -1) {
@@ -178,13 +105,7 @@ const updateHealthGoal = async (goalId, goalData) => {
     throw new Error("Health goal not found for update.");
 };
 
-/**
- * Deletes a health goal.
- * @param {string} goalId - The ID of the goal to delete.
- * @returns {Promise<{message: string}>} Confirmation message.
- */
 const deleteHealthGoal = async (goalId) => {
-    console.log("Simulating API: Deleting health goal", goalId);
     await simulateDelay(500);
     const initialLength = mockHealthGoals.length;
     mockHealthGoals = mockHealthGoals.filter(g => g._id !== goalId);
@@ -193,7 +114,6 @@ const deleteHealthGoal = async (goalId) => {
     }
     return { message: "Health goal deleted successfully" };
 };
-
 
 const patientDataService = {
     getMyRecentLabResults,
