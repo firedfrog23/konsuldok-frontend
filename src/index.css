@@ -15,85 +15,98 @@
 @plugin "daisyui/theme" {
   name: "konsuldok-theme";
   default: true;
-  prefersdark: false;
+  prefersdark: false; /* Explicitly light theme */
   color-scheme: "light";
 
-  /* --- NEW 4-Color Palette STRICT --- */
+  /* --- STRICT 3-Color Palette: #FFFFFF, #000000, #007FFF --- */
+
   /* Base Colors */
-  --color-base-100: oklch(98.7% 0.003 280); /* Chill White (#F9FAFB) */
-  /* Use subtle blue/orange tints for 200/300 to avoid gray */
-  --color-base-200: oklch(97.5% 0.008 260); /* Off-white with slight blue tint */
-  --color-base-300: oklch(97.5% 0.008 50);  /* Off-white with slight orange tint */
-  --color-base-content: oklch(10.5% 0.006 260); /* Black (#101314) */
+  --color-base-100: #FFFFFF; /* Main Background - White */
+  --color-base-200: #FFFFFF; /* Secondary Background - White (Flat design, use borders for separation) */
+  --color-base-300: #FFFFFF; /* Tertiary Background - White (Flat design, use borders for separation) */
+  --color-base-content: #000000; /* Main Text Color - Black */
 
   /* Primary Color (Blue) */
-  --color-primary: oklch(62.7% 0.18 259.8);  /* Blue */
-  --color-primary-focus: oklch(58% 0.2 260);   /* Slightly Darker Blue */
-  --color-primary-content: oklch(98.7% 0.003 280); /* Chill White */
+  --color-primary: #007FFF;         /* Blue */
+  --color-primary-focus: #007FFF;    /* Blue (Rely on DaisyUI's default focus ring behavior or outline) */
+  --color-primary-content: #FFFFFF; /* White (Text on Blue elements) */
 
-  /* Secondary Color (Orange) */
-  --color-secondary: oklch(70.6% 0.19 50.4); /* Orange */
-   --color-secondary-focus: oklch(66% 0.21 50); /* Slightly Darker Orange */
-  --color-secondary-content: oklch(98.7% 0.003 280); /* Chill White */
+  /* Secondary Color (Black for contrast, as an alternative to Blue) */
+  --color-secondary: #000000;        /* Black */
+  --color-secondary-focus: #000000;  /* Black */
+  --color-secondary-content: #FFFFFF;/* White (Text on Black elements) */
 
-  /* Accent Color (Mapped to Secondary Orange) */
-  --color-accent: oklch(70.6% 0.19 50.4); /* Orange */
-  --color-accent-focus: oklch(66% 0.21 50); /* Slightly Darker Orange */
-  --color-accent-content: oklch(98.7% 0.003 280); /* Chill White */
+  /* Accent Color (Mapped to Primary Blue) */
+  --color-accent: #007FFF;          /* Blue */
+  --color-accent-focus: #007FFF;     /* Blue */
+  --color-accent-content: #FFFFFF;  /* White */
 
-  /* Neutral Color (Mapped to Black BG / White Text) */
-  --color-neutral: oklch(10.5% 0.006 260); /* Black (#101314) */
-  --color-neutral-focus: oklch(15% 0.006 260); /* Slightly Lighter Black */
-  --color-neutral-content: oklch(98.7% 0.003 280); /* Chill White */
+  /* Neutral Color (Black for backgrounds, White for text on them) */
+  --color-neutral: #000000;          /* Black */
+  --color-neutral-focus: #000000;    /* Black */
+  --color-neutral-content: #FFFFFF; /* White */
 
-  /* Functional Colors (Mapped to Blue/Orange) */
-  --color-info: oklch(62.7% 0.18 259.8);        /* Blue */
-  --color-info-content: oklch(98.7% 0.003 280); /* Chill White */
-  --color-success: oklch(62.7% 0.18 259.8);      /* Blue */
-  --color-success-content: oklch(98.7% 0.003 280);/* Chill White */
-  --color-warning: oklch(70.6% 0.19 50.4);       /* Orange */
-  --color-warning-content: oklch(98.7% 0.003 280);/* Chill White */
-  --color-error: oklch(70.6% 0.19 50.4);         /* Orange */
-  --color-error-content: oklch(98.7% 0.003 280);  /* Chill White */
-  /* --- END NEW PALETTE --- */
+  /* Functional Colors (Mapped to Blue or Black/White) */
+  --color-info: #007FFF;             /* Blue for informational messages */
+  --color-info-content: #FFFFFF;    /* White */
 
-  /* Font Family */
+  --color-success: #007FFF;          /* Blue for success messages (distinguish with icons/text) */
+  --color-success-content: #FFFFFF; /* White */
+
+  --color-warning: #000000;          /* Black background for warnings (distinguish with icons/text) */
+  --color-warning-content: #FFFFFF; /* White */
+
+  --color-error: #000000;            /* Black background for errors (distinguish with icons/text) */
+  --color-error-content: #FFFFFF;   /* White */
+  /* --- END 3-Color Palette --- */
+
+  /* Font Family (Unchanged) */
   --font-family-sans: "Poppins", "Inter", system-ui, sans-serif;
 
-  /* Radii and Other variables */
-  --radius-box: 0.75rem;  /* Slightly smaller radius */
+  /* Radii and Other variables (Unchanged) */
+  --radius-box: 0.75rem;
   --rounded-btn: 0.5rem;
-  --rounded-badge: 1.9rem;
-  --border: 1px; /* Keep border width */
-  /* Remove others if not needed */
+  --rounded-badge: 1.9rem; /* This is quite a large radius for badges */
+  --border: 1px;
 }
 
-/* 5. REMOVED Separate @theme block */
+/* 5. REMOVED Separate @theme block (as per original structure) */
 
 /* 6. Custom Component Styles Specific to the Theme */
 [data-theme="konsuldok-theme"] {
-  /* Custom Badge Styles - Use theme functional colors */
-  .badge-submitted { background-color: var(--color-success); color: var(--color-success-content); border-color: transparent; }
-  .badge-in-review { background-color: var(--color-warning); color: var(--color-warning-content); border-color: transparent; }
-  .badge-marked { background-color: var(--color-secondary); color: var(--color-secondary-content); border-color: transparent; }
+  /* Custom Badge Styles - Use new theme functional colors */
+  .badge-submitted { /* Was success (blue), now maps to primary (blue) */
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+    border-color: transparent;
+  }
+  .badge-in-review { /* Was warning (orange), now maps to neutral (black bg, white text) */
+    background-color: var(--color-neutral);
+    color: var(--color-neutral-content);
+    border-color: transparent;
+  }
+  .badge-marked { /* Was secondary (orange), now maps to secondary (black bg, white text) */
+    background-color: var(--color-secondary);
+    color: var(--color-secondary-content);
+    border-color: transparent;
+  }
 }
 
-/* 7. Custom Utility Classes & Overrides */
-/* REMOVED .btn-primary-light and .custom-scrollbar */
+/* 7. Custom Utility Classes & Overrides (Unchanged) */
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Animations (Keep as is) */
-@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } } /* Subtle float */
+/* Animations (Unchanged) */
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
 .auth-square { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; animation-delay: 0.5s; }
 
-/* Apply base font and ensure body takes full height */
+/* Apply base font and ensure body takes full height (Unchanged logic, but colors now map to new palette) */
 html, body {
   height: 100%;
 }
 body {
-  @apply font-sans bg-base-100 text-base-content; /* Base is Off-White, Text is Black */
+  @apply font-sans bg-base-100 text-base-content; /* Will be White BG, Black Text */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
