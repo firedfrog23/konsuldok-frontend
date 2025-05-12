@@ -38,7 +38,7 @@ import AppointmentDetailPage from '../pages/AppointmentDetailPage.jsx'; // Detai
 import AppointmentsPage from '../pages/AppointmentsPage.jsx'; // Patient's appointments list
 import BookAppointmentPage from '../pages/BookAppointmentPage.jsx';
 // --- ADDED Phase 5 Patient Pages ---
-import MedicalRecordsPortalPage from '../pages/patient/MedicalRecordsPortalPage.jsx';
+import MedicalRecordsPortalPage from "../pages/patient/MedicalRecordsPortalPage.jsx"
 import LabResultsPage from '../pages/patient/LabResultsPage.jsx';
 import MedicationsPage from '../pages/patient/MedicationsPage.jsx';
 import HealthGoalsPage from '../pages/patient/HealthGoalsPage.jsx';
