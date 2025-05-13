@@ -1,11 +1,11 @@
 // src/pages/patient/LabResultsPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
-import patientDataService from '../../services/patientData.service.js';
-import LabResultListItem from '../../components/medical/LabResultListItem.jsx';
 import { BeakerIcon, ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'; // DocumentPlusIcon removed
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import LabResultListItem from '../../components/medical/LabResultListItem.jsx';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useNotification } from '../../contexts/NotificationContext.jsx';
+import patientDataService from '../../services/patient.service.js';
 
 /**
  * Page for patients to view all their lab results with pagination.

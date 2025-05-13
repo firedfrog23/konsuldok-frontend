@@ -1,11 +1,11 @@
 // src/pages/patient/MedicationsPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon, ClipboardDocumentListIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'; // PlusCircleIcon removed
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
-import patientDataService from '../../services/patientData.service.js';
 import MedicationListItem from '../../components/medications/MedicationListItem.jsx';
-import { ClipboardDocumentListIcon, ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'; // PlusCircleIcon removed
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useNotification } from '../../contexts/NotificationContext.jsx';
+import patientDataService from '../../services/patient.service.js';
 
 /**
  * Page for patients to view their medications with pagination and filtering.

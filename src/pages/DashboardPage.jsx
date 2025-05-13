@@ -1,20 +1,34 @@
 // src/pages/DashboardPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import { motion, AnimatePresence } from 'framer-motion';
-import appointmentService from '../services/appointment.service.js';
-import patientDataService from '../services/patientData.service.js';
-import { UserRoles } from '../utils/constants.js';
 import {
-    CalendarDaysIcon, ChatBubbleLeftEllipsisIcon, DocumentTextIcon, PlusCircleIcon,
-    UserCircleIcon, SparklesIcon, ChartBarIcon, ArrowRightIcon, NewspaperIcon,
-    BeakerIcon, FlagIcon, LinkIcon, HeartIcon, ClipboardDocumentListIcon,
-    UserGroupIcon, InformationCircleIcon, ExclamationTriangleIcon, BriefcaseIcon,
+    ArrowRightIcon,
+    BeakerIcon,
+    BriefcaseIcon,
+    CalendarDaysIcon,
+    ChartBarIcon,
+    ChatBubbleLeftEllipsisIcon,
+    ClipboardDocumentListIcon,
+    DocumentTextIcon,
+    ExclamationTriangleIcon,
+    FlagIcon,
+    HeartIcon,
+    InformationCircleIcon,
+    LinkIcon,
+    NewspaperIcon,
+    PlusCircleIcon,
+    SparklesIcon,
+    UserCircleIcon,
+    UserGroupIcon,
     VideoCameraIcon
 } from '@heroicons/react/24/outline';
+import { format, isFuture, isToday, parseISO } from 'date-fns';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
-import { format, isToday, parseISO, isFuture } from 'date-fns';
+import appointmentService from '../services/appointment.service.js';
+import patientDataService from '../services/patient.service.js';
+import { UserRoles } from '../utils/constants.js';
 
 /**
  * Patient-specific dashboard content.

@@ -1,13 +1,13 @@
 // src/pages/patient/HealthGoalsPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon, FlagIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
-import patientDataService from '../../services/patientData.service.js';
-import HealthGoalListItem from '../../components/goals/HealthGoalListItem.jsx';
 import HealthGoalForm from '../../components/goals/HealthGoalForm.jsx';
-import { FlagIcon, PlusCircleIcon, ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import HealthGoalListItem from '../../components/goals/HealthGoalListItem.jsx';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useNotification } from '../../contexts/NotificationContext.jsx';
-import { motion, AnimatePresence } from 'framer-motion';
+import patientDataService from '../../services/patient.service.js';
 
 /**
  * Page for patients to view, add, edit, and delete their health goals.

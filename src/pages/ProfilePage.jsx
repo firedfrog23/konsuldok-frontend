@@ -1,13 +1,16 @@
 // src/pages/ProfilePage.jsx
-import React, { useState, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import ProfileUpdateForm from '../components/user/ProfileUpdateForm.jsx';
-import userService from '../../services/user.service.js';
-import { useNotification } from '../../contexts/NotificationContext.jsx';
 import {
-    UserCircleIcon, EnvelopeIcon, PhoneIcon, ShieldCheckIcon,
-    IdentificationIcon, PencilSquareIcon, ArrowUpTrayIcon, CameraIcon
+    ArrowUpTrayIcon, CameraIcon,
+    EnvelopeIcon,
+    IdentificationIcon, PencilSquareIcon,
+    PhoneIcon, ShieldCheckIcon,
+    UserCircleIcon
 } from '@heroicons/react/24/outline';
+import { useRef, useState } from 'react';
+import ProfileUpdateForm from '../components/user/ProfileUpdateForm.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
+import userService from '../services/user.service.js';
 
 /**
  * User Profile Page. Adheres to strict 3-color palette.
